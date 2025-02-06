@@ -1,9 +1,11 @@
 #include "funkcje_projekt.cpp"
+
 using namespace funkcje;
 
 int main() {
-    system("chcp 1250>>null");
+    ustawMenuKodowanie();
     wczytajZPliku();
+
     int wybor = -1;
     while (wybor != 0) {
         wybor = menu();
@@ -26,6 +28,5 @@ int main() {
         }
     }
 
-    system("pause");
     return 0;
 }

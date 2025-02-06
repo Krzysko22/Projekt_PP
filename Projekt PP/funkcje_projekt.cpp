@@ -4,230 +4,306 @@
 #include <cstring>
 #include <cstdlib>
 using namespace std;
+
 namespace funkcje {
-const int MAX_INTERESTS = 10;
-const int MAX_PEOPLE = 100;
-const string FILENAME = "adresy.dat";
+    const int MAKS_ZAINTERESOWAN = 10;
+    const int MAKS_OSOB = 100;
+    const string NAZWA_PLIKU = "adresy.dat";
 
-struct Interest {
-    char name[50];
-    char category[50];
-};
+    struct Zainteresowanie {
+        char nazwa[50];
+        char kategoria[50];
+    };
 
-struct Person {
-    char firstName[50];
-    char lastName[50];
-    char street[100];
-    char city[50];
-    char postalCode[10];
-    char email[100];
-    Interest interests[MAX_INTERESTS];
-    int interestCount;
-};
-
-Person people[MAX_PEOPLE];
-int peopleCount = 0;
-
-void wczytajZPliku() {
-    ifstream file(FILENAME, ios::binary);
-    if (file.is_open()) {
-        file.read(reinterpret_cast<char*>(&peopleCount), sizeof(peopleCount));
-        file.read(reinterpret_cast<char*>(people), peopleCount * sizeof(Person));
-        file.close();
-    }
-}
-
-void zapiszDoPliku() {
-    ofstream file(FILENAME, ios::binary);
-    if (file.is_open()) {
-        file.write(reinterpret_cast<char*>(&peopleCount), sizeof(peopleCount));
-        file.write(reinterpret_cast<char*>(people), peopleCount * sizeof(Person));
-        file.close();
-    }
-}
-void wstep(){
-    system("CLS");
-    cout << "========================================================================================" << endl;
-    cout << "                System wspomagającegy zarządzanie zbiorem adresów osób.                 " << endl;
-    cout << "========================================================================================" << endl;
-}
-
-int menu() {
-    wstep();
-    int wybor;
-    cout << "\nSystem zarządzania adresami\n";
-    cout << "1. Dodaj osobę\n";
-    cout << "2. Usuń osobę\n";
-    cout << "3. Modyfikuj dane osoby\n";
-    cout << "4. Wyświetl wszystkie osoby\n";
-    cout << "5. Wyświetl grupy zainteresowań\n";
-    cout << "0. Wyjście\n";
-    cout << "Wybierz opcję: ";
-    cin >> wybor;
-    return wybor;
-}
-
-void dodawanie() {
-    if (peopleCount >= MAX_PEOPLE) {
-        cout << "Osiągnięto maksymalną liczbę osób!\n";
-        return;
-    }
-
-    Person& newPerson = people[peopleCount];
-    cout << "Podaj imię: ";
-    cin >> newPerson.firstName;
-    cout << "Podaj nazwisko: ";
-    cin >> newPerson.lastName;
-    cout << "Podaj ulicę: ";
-    cin.ignore();
-    cin.getline(newPerson.street, 100);
-    cout << "Podaj miasto: ";
-    cin.getline(newPerson.city, 50);
-    cout << "Podaj kod pocztowy: ";
-    cin >> newPerson.postalCode;
-    cout << "Podaj email: ";
-    cin >> newPerson.email;
-
-    cout << "Ile zainteresowań chcesz dodać? ";
-    cin >> newPerson.interestCount;
-    newPerson.interestCount = min(newPerson.interestCount, MAX_INTERESTS);
-
-    for (int i = 0; i < newPerson.interestCount; i++) {
-        cout << "Podaj nazwę zainteresowania " << i+1 << ": ";
-        cin >> newPerson.interests[i].name;
-        cout << "Podaj kategorię zainteresowania " << i+1 << ": ";
-        cin >> newPerson.interests[i].category;
-    }
-
-    peopleCount++;
-    zapiszDoPliku();
-    cout << "Dodano nową osobę.\n";
-}
-void wyswietlGrupy() {
-    if (peopleCount == 0) {
-        cout << "Brak osób w bazie!\n";
-        return;
-    }
+    struct Osoba {
+        char imie[50];
+        char nazwisko[50];
+        char ulica[100];
+        char miasto[50];
+        char kodPocztowy[10];
+        char email[100];
+        Zainteresowanie zainteresowania[MAKS_ZAINTERESOWAN];
+        int liczbaZainteresowan;
+    };
 
     struct GrupaZainteresowania {
         char nazwa[50];
-        int czlonkowie[MAX_PEOPLE];
+        int czlonkowie[MAKS_OSOB];
         int liczbaOsob;
-    } grupy[MAX_INTERESTS * MAX_PEOPLE];
-    int liczbaGrup = 0;
+    };
 
+    Osoba osoby[MAKS_OSOB];
+    int liczbaOsob = 0;
 
-    for (int i = 0; i < peopleCount; i++) {
-        for (int j = 0; j < people[i].interestCount; j++) {
-            bool znalezionoGrupe = false;
+    void wczytajZPliku() {
+        ifstream plik(NAZWA_PLIKU, ios::binary);
+        if (plik.is_open()) {
+            plik.read(reinterpret_cast<char*>(&liczbaOsob), sizeof(liczbaOsob));
+            plik.read(reinterpret_cast<char*>(osoby), liczbaOsob * sizeof(Osoba));
+            plik.close();
+        }
+    }
 
+    void zapiszDoPliku() {
+        ofstream plik(NAZWA_PLIKU, ios::binary);
+        if (plik.is_open()) {
+            plik.write(reinterpret_cast<char*>(&liczbaOsob), sizeof(liczbaOsob));
+            plik.write(reinterpret_cast<char*>(osoby), liczbaOsob * sizeof(Osoba));
+            plik.close();
+        }
+    }
 
-            for (int k = 0; k < liczbaGrup; k++) {
-                if (strcmp(grupy[k].nazwa, people[i].interests[j].name) == 0) {
-                    grupy[k].czlonkowie[grupy[k].liczbaOsob++] = i;
-                    znalezionoGrupe = true;
-                    break;
+    void ustawMenuKodowanie() {
+        system("chcp 65001");
+    }
+
+    void ustawOperacyjneKodowanie() {
+        system("chcp 1250");
+    }
+
+    void wstep() {
+        system("CLS");
+        ustawMenuKodowanie();
+        cout << "========================================================================================" << endl;
+        cout << "                System wspomagający zarządzanie zbiorem adresów osób.                 " << endl;
+        cout << "========================================================================================" << endl;
+    }
+
+    int menu() {
+        wstep();
+        int wybor;
+        cout << "\nSystem zarządzania adresami\n";
+        cout << "1. Dodaj osobę\n";
+        cout << "2. Usuń osobę\n";
+        cout << "3. Modyfikuj dane osoby\n";
+        cout << "4. Wyświetl wszystkie osoby\n";
+        cout << "5. Wyświetl grupy zainteresowań\n";
+        cout << "0. Wyjście\n";
+        cout << "Wybierz opcję: ";
+        cin >> wybor;
+        ustawOperacyjneKodowanie();
+        return wybor;
+    }
+
+    void wczytajDaneOsobowe(Osoba& osoba) {
+        cout << "Podaj imie: ";
+        cin >> osoba.imie;
+        cout << "Podaj nazwisko: ";
+        cin >> osoba.nazwisko;
+    }
+
+    void wczytajAdres(Osoba& osoba) {
+        cout << "Podaj ulice: ";
+        cin.ignore();
+        cin.getline(osoba.ulica, 100);
+        cout << "Podaj miasto: ";
+        cin.getline(osoba.miasto, 50);
+        cout << "Podaj kod pocztowy: ";
+        cin >> osoba.kodPocztowy;
+    }
+
+    void wczytajKontakt(Osoba& osoba) {
+        cout << "Podaj email: ";
+        cin >> osoba.email;
+    }
+
+    void wczytajZainteresowania(Osoba& osoba) {
+        cout << "Ile zainteresowan chcesz dodac? ";
+        cin >> osoba.liczbaZainteresowan;
+        osoba.liczbaZainteresowan = min(osoba.liczbaZainteresowan, MAKS_ZAINTERESOWAN);
+
+        for (int i = 0; i < osoba.liczbaZainteresowan; i++) {
+            cout << "Podaj nazwe zainteresowania " << i+1 << ": ";
+            cin >> osoba.zainteresowania[i].nazwa;
+            cout << "Podaj kategorię zainteresowania " << i+1 << ": ";
+            cin >> osoba.zainteresowania[i].kategoria;
+        }
+    }
+
+    void dodawanie() {
+        system("CLS");
+        ustawOperacyjneKodowanie();
+
+        if (liczbaOsob >= MAKS_OSOB) {
+            cout << "Osiągnięto maksymalną liczbę osób!\n";
+            return;
+        }
+
+        Osoba& nowaOsoba = osoby[liczbaOsob];
+        wczytajDaneOsobowe(nowaOsoba);
+        wczytajAdres(nowaOsoba);
+        wczytajKontakt(nowaOsoba);
+        wczytajZainteresowania(nowaOsoba);
+
+        liczbaOsob++;
+        zapiszDoPliku();
+        cout << "Dodano nową osobę.\n";
+        system("pause");
+    }
+
+    void inicjalizujGrupe(GrupaZainteresowania& grupa, const char* nazwa, int pierwszyCzlonek) {
+        strcpy(grupa.nazwa, nazwa);
+        grupa.czlonkowie[0] = pierwszyCzlonek;
+        grupa.liczbaOsob = 1;
+    }
+
+    void dodajCzlonkaDoGrupy(GrupaZainteresowania& grupa, int indeksOsoby) {
+        grupa.czlonkowie[grupa.liczbaOsob++] = indeksOsoby;
+    }
+
+    void wyswietlCzlonkowGrupy(const GrupaZainteresowania& grupa) {
+        cout << "\nGrupa: " << grupa.nazwa << "\n";
+        cout << "Czlonkowie:\n";
+        for (int j = 0; j < grupa.liczbaOsob; j++) {
+            int indeks = grupa.czlonkowie[j];
+            cout << "- " << osoby[indeks].imie << " " << osoby[indeks].nazwisko << "\n";
+        }
+    }
+
+    void przygotujGrupy(GrupaZainteresowania* grupy, int& liczbaGrup) {
+        liczbaGrup = 0;
+
+        for (int i = 0; i < liczbaOsob; i++) {
+            for (int j = 0; j < osoby[i].liczbaZainteresowan; j++) {
+                int znalezionoGrupe = 0;
+
+                for (int k = 0; k < liczbaGrup; k++) {
+                    if (strcmp(grupy[k].nazwa, osoby[i].zainteresowania[j].nazwa) == 0) {
+                        dodajCzlonkaDoGrupy(grupy[k], i);
+                        znalezionoGrupe = 1;
+                        break;
+                    }
+                }
+
+                if (!znalezionoGrupe) {
+                    inicjalizujGrupe(grupy[liczbaGrup], osoby[i].zainteresowania[j].nazwa, i);
+                    liczbaGrup++;
                 }
             }
+        }
+    }
 
-            if (!znalezionoGrupe) {
-                strcpy(grupy[liczbaGrup].nazwa, people[i].interests[j].name);
-                grupy[liczbaGrup].czlonkowie[0] = i;
-                grupy[liczbaGrup].liczbaOsob = 1;
-                liczbaGrup++;
+    int pobierzIndeksOsoby(const string& akcja) {
+        cout << "Podaj numer osoby do " << akcja << " (1-" << liczbaOsob << "): ";
+        int indeks;
+        cin >> indeks;
+        return indeks - 1;
+    }
+
+    int czyIndeksPoprawny(int indeks) {
+        if (indeks < 0 || indeks >= liczbaOsob) {
+            cout << "Nieprawidłowy numer!\n";
+            return 0;
+        }
+        return 1;
+    }
+
+    int czyZostawicStaraWartosc(const string& nowaWartosc) {
+        return nowaWartosc == "." ? 1 : 0;
+    }
+
+    void modyfikujPodstawoweDane(Osoba& osoba) {
+        string temp;
+        cout << "Podaj nowe imię (lub . aby zostawić): ";
+        cin >> temp;
+        if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.imie, temp.c_str());
+
+        cout << "Podaj nowe nazwisko (lub . aby zostawić): ";
+        cin >> temp;
+        if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.nazwisko, temp.c_str());
+    }
+
+    void modyfikujKontakt(Osoba& osoba) {
+        string temp;
+        cout << "Podaj nowy email (lub . aby zostawić): ";
+        cin >> temp;
+        if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.email, temp.c_str());
+    }
+
+    void wyswietlanie() {
+        system("CLS");
+        ustawOperacyjneKodowanie();
+
+        if (liczbaOsob == 0) {
+            cout << "Brak osób w bazie!\n";
+            return;
+        }
+
+        for (int i = 0; i < liczbaOsob; i++) {
+            const Osoba& osoba = osoby[i];
+            cout << "\nOsoba " << i+1 << ":\n";
+            cout << "Imie i nazwisko: " << osoba.imie << " " << osoba.nazwisko << "\n";
+            cout << "Adres: " << osoba.ulica << ", " << osoba.miasto << " " << osoba.kodPocztowy << "\n";
+            cout << "Email: " << osoba.email << "\n";
+            cout << "Zainteresowania:\n";
+            for (int j = 0; j < osoba.liczbaZainteresowan; j++) {
+                cout << "  - " << osoba.zainteresowania[j].nazwa
+                     << " (kategoria: " << osoba.zainteresowania[j].kategoria << ")\n";
             }
         }
+        system("pause");
     }
 
-    cout << "\nGrupy zainteresowań:\n";
-    for (int i = 0; i < liczbaGrup; i++) {
-        cout << "\nGrupa: " << grupy[i].nazwa << "\n";
-        cout << "Członkowie:\n";
-        for (int j = 0; j < grupy[i].liczbaOsob; j++) {
-            int index = grupy[i].czlonkowie[j];
-            cout << "- " << people[index].firstName << " "
-                     << people[index].lastName << "\n";
+    void wyswietlGrupy() {
+        system("CLS");
+        ustawOperacyjneKodowanie();
+
+        if (liczbaOsob == 0) {
+            cout << "Brak osób w bazie!\n";
+            return;
         }
-    }
-    system("pause");
-}
-void usuwanie() {
-    if (peopleCount == 0) {
-        cout << "Brak osób w bazie!\n";
-        return;
-    }
 
-    cout << "Podaj numer osoby do usunięcia (1-" << peopleCount << "): ";
-    int index;
-    cin >> index;
-    index--;
+        GrupaZainteresowania grupy[MAKS_ZAINTERESOWAN * MAKS_OSOB];
+        int liczbaGrup;
 
-    if (index < 0 || index >= peopleCount) {
-        cout << "Nieprawidłowy numer!\n";
-        return;
-    }
+        przygotujGrupy(grupy, liczbaGrup);
 
-    for (int i = index; i < peopleCount - 1; i++) {
-        people[i] = people[i + 1];
-    }
-    peopleCount--;
-    zapiszDoPliku();
-    cout << "Usunięto osobę.\n";
-}
-
-void modyfikowanie() {
-    if (peopleCount == 0) {
-        cout << "Brak osób w bazie!\n";
-        return;
-    }
-
-    cout << "Podaj numer osoby do modyfikacji (1-" << peopleCount << "): ";
-    int index;
-    cin >> index;
-    index--;
-
-    if (index < 0 || index >= peopleCount) {
-        cout << "Nieprawidłowy numer!\n";
-        return;
-    }
-
-    Person& person = people[index];
-    cout << "Podaj nowe imię (lub . aby zostawić): ";
-    string temp;
-    cin >> temp;
-    if (temp != ".") strcpy(person.firstName, temp.c_str());
-
-    cout << "Podaj nowe nazwisko (lub . aby zostawić): ";
-    cin >> temp;
-    if (temp != ".") strcpy(person.lastName, temp.c_str());
-
-    cout << "Podaj nowy email (lub . aby zostawić): ";
-    cin >> temp;
-    if (temp != ".") strcpy(person.email, temp.c_str());
-
-    zapiszDoPliku();
-    cout << "Zmodyfikowano dane osoby.\n";
-}
-
-void wyswietlanie() {
-    if (peopleCount == 0) {
-        cout << "Brak osób w bazie!\n";
-        return;
-    }
-
-    for (int i = 0; i < peopleCount; i++) {
-        const Person& person = people[i];
-        cout << "\nOsoba " << i+1 << ":\n";
-        cout << "Imię i nazwisko: " << person.firstName << " " << person.lastName << "\n";
-        cout << "Adres: " << person.street << ", " << person.city << " " << person.postalCode << "\n";
-        cout << "Email: " << person.email << "\n";
-        cout << "Zainteresowania:\n";
-        for (int j = 0; j < person.interestCount; j++) {
-            cout << "  - " << person.interests[j].name
-                     << " (kategoria: " << person.interests[j].category << ")\n";
+        cout << "\nGrupy zainteresowan:\n";
+        for (int i = 0; i < liczbaGrup; i++) {
+            wyswietlCzlonkowGrupy(grupy[i]);
         }
+        system("pause");
     }
-     system("pause");
-}
 
+    void modyfikowanie() {
+        system("CLS");
+        ustawOperacyjneKodowanie();
+
+        if (liczbaOsob == 0) {
+            cout << "Brak osób w bazie!\n";
+            return;
+        }
+
+        int indeks = pobierzIndeksOsoby("modyfikacji");
+        if (!czyIndeksPoprawny(indeks)) return;
+
+        Osoba& osoba = osoby[indeks];
+        modyfikujPodstawoweDane(osoba);
+        modyfikujKontakt(osoba);
+
+        zapiszDoPliku();
+        cout << "Zmodyfikowano dane osoby.\n";
+        system("pause");
+    }
+
+    void usuwanie() {
+        system("CLS");
+        ustawOperacyjneKodowanie();
+
+        if (liczbaOsob == 0) {
+            cout << "Brak osób w bazie!\n";
+            return;
+        }
+
+        int indeks = pobierzIndeksOsoby("usunięcia");
+        if (!czyIndeksPoprawny(indeks)) return;
+
+        for (int i = indeks; i < liczbaOsob - 1; i++) {
+            osoby[i] = osoby[i + 1];
+        }
+        liczbaOsob--;
+        zapiszDoPliku();
+        cout << "Usunieto osobe.\n";
+        system("pause");
+    }
 }

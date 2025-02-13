@@ -1,5 +1,4 @@
 #include "funkcje_projekt.cpp"
-
 using namespace funkcje;
 
 int main() {
@@ -27,6 +26,5 @@ int main() {
                 break;
         }
     }
-
     return 0;
 }

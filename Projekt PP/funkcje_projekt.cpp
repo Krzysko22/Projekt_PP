@@ -12,7 +12,6 @@ namespace funkcje {
 
     struct Zainteresowanie {
         char nazwa[50];
-        char kategoria[50];
     };
 
     struct Osoba {
@@ -86,7 +85,7 @@ namespace funkcje {
     }
 
     void wczytajDaneOsobowe(Osoba& osoba) {
-        cout << "Podaj imie: ";
+        cout << "Podaj imi\352: ";
         cin >> osoba.imie;
         cout << "Podaj nazwisko: ";
         cin >> osoba.nazwisko;
@@ -108,15 +107,13 @@ namespace funkcje {
     }
 
     void wczytajZainteresowania(Osoba& osoba) {
-        cout << "Ile zainteresowan chcesz dodac? ";
+        cout << "Ile zainteresowa\361 chcesz doda\346? ";
         cin >> osoba.liczbaZainteresowan;
         osoba.liczbaZainteresowan = min(osoba.liczbaZainteresowan, MAKS_ZAINTERESOWAN);
 
         for (int i = 0; i < osoba.liczbaZainteresowan; i++) {
             cout << "Podaj nazwe zainteresowania " << i+1 << ": ";
             cin >> osoba.zainteresowania[i].nazwa;
-            cout << "Podaj kategorię zainteresowania " << i+1 << ": ";
-            cin >> osoba.zainteresowania[i].kategoria;
         }
     }
 
@@ -137,7 +134,7 @@ namespace funkcje {
 
         liczbaOsob++;
         zapiszDoPliku();
-        cout << "Dodano nową osobę.\n";
+        cout << "Dodano now\271 osob\352.\n";
         system("pause");
     }
 
@@ -153,7 +150,7 @@ namespace funkcje {
 
     void wyswietlCzlonkowGrupy(const GrupaZainteresowania& grupa) {
         cout << "\nGrupa: " << grupa.nazwa << "\n";
-        cout << "Czlonkowie:\n";
+        cout << "Cz\263onkowie:\n";
         for (int j = 0; j < grupa.liczbaOsob; j++) {
             int indeks = grupa.czlonkowie[j];
             cout << "- " << osoby[indeks].imie << " " << osoby[indeks].nazwisko << "\n";
@@ -204,18 +201,18 @@ namespace funkcje {
 
     void modyfikujPodstawoweDane(Osoba& osoba) {
         string temp;
-        cout << "Podaj nowe imię (lub . aby zostawić): ";
+        cout << "Podaj nowe imi\352 (lub . aby zostawic): ";
         cin >> temp;
         if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.imie, temp.c_str());
 
-        cout << "Podaj nowe nazwisko (lub . aby zostawić): ";
+        cout << "Podaj nowe nazwisko (lub . aby zostawic): ";
         cin >> temp;
         if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.nazwisko, temp.c_str());
     }
 
     void modyfikujKontakt(Osoba& osoba) {
         string temp;
-        cout << "Podaj nowy email (lub . aby zostawić): ";
+        cout << "Podaj nowy email (lub . aby zostawic): ";
         cin >> temp;
         if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.email, temp.c_str());
     }
@@ -225,20 +222,19 @@ namespace funkcje {
         ustawOperacyjneKodowanie();
 
         if (liczbaOsob == 0) {
-            cout << "Brak osób w bazie!\n";
+            cout << "Brak osob w bazie!\n";
             return;
         }
 
         for (int i = 0; i < liczbaOsob; i++) {
             const Osoba& osoba = osoby[i];
             cout << "\nOsoba " << i+1 << ":\n";
-            cout << "Imie i nazwisko: " << osoba.imie << " " << osoba.nazwisko << "\n";
+            cout << "Imi\352 i nazwisko: " << osoba.imie << " " << osoba.nazwisko << "\n";
             cout << "Adres: " << osoba.ulica << ", " << osoba.miasto << " " << osoba.kodPocztowy << "\n";
             cout << "Email: " << osoba.email << "\n";
             cout << "Zainteresowania:\n";
             for (int j = 0; j < osoba.liczbaZainteresowan; j++) {
-                cout << "  - " << osoba.zainteresowania[j].nazwa
-                     << " (kategoria: " << osoba.zainteresowania[j].kategoria << ")\n";
+                cout << "  - " << osoba.zainteresowania[j].nazwa << "\n";
             }
         }
         system("pause");
@@ -258,11 +254,98 @@ namespace funkcje {
 
         przygotujGrupy(grupy, liczbaGrup);
 
-        cout << "\nGrupy zainteresowan:\n";
+        cout << "\nGrupy zainteresowa\361:\n";
         for (int i = 0; i < liczbaGrup; i++) {
             wyswietlCzlonkowGrupy(grupy[i]);
         }
         system("pause");
+    }
+
+    void modyfikujAdres(Osoba& osoba) {
+        string temp;
+        cin.ignore();
+        cout << "Podaj now\271 ulic\352 (lub . aby zostawi\346): ";
+        getline(cin, temp);
+        if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.ulica, temp.c_str());
+
+        cout << "Podaj nowe miasto (lub . aby zostawi\346): ";
+        getline(cin, temp);
+        if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.miasto, temp.c_str());
+
+        cout << "Podaj nowy kod pocztowy (lub . aby zostawi\346): ";
+        cin >> temp;
+        if (!czyZostawicStaraWartosc(temp)) strcpy(osoba.kodPocztowy, temp.c_str());
+    }
+
+    void modyfikujZainteresowania(Osoba& osoba) {
+        char wybor;
+        cout << "Czy chcesz zmodyfikowa\346 zainteresowania? (t/n): ";
+        cin >> wybor;
+
+        if (wybor == 't' || wybor == 'T') {
+            cout << "Obecne zainteresowania:\n";
+            for (int i = 0; i < osoba.liczbaZainteresowan; i++) {
+                cout << i + 1 << ". " << osoba.zainteresowania[i].nazwa << "\n";
+            }
+
+            cout << "\nWybierz operacj\352:\n";
+            cout << "1. Dodaj nowe zainteresowanie\n";
+            cout << "2. Usu\361 zainteresowanie\n";
+            cout << "3. Modyfikuj istniej\271ce zainteresowanie\n";
+            cout << "4. Zast\271p wszystkie zainteresowania\n";
+            int operacja;
+            cin >> operacja;
+
+            switch (operacja) {
+                case 1: {
+                    if (osoba.liczbaZainteresowan < MAKS_ZAINTERESOWAN) {
+                        cout << "Podaj nazw\352 nowego zainteresowania: ";
+                        cin >> osoba.zainteresowania[osoba.liczbaZainteresowan].nazwa;
+                        osoba.liczbaZainteresowan++;
+                    } else {
+                        cout << "Osiągni\352to maksymalną liczbę zainteresowań!\n";
+                    }
+                    break;
+                }
+                case 2: {
+                    cout << "Podaj numer zainteresowania do usuni\352cia (1-" << osoba.liczbaZainteresowan << "): ";
+                    int indeks;
+                    cin >> indeks;
+                    indeks--;
+
+                    if (indeks >= 0 && indeks < osoba.liczbaZainteresowan) {
+                        for (int i = indeks; i < osoba.liczbaZainteresowan - 1; i++) {
+                            strcpy(osoba.zainteresowania[i].nazwa, osoba.zainteresowania[i + 1].nazwa);
+                        }
+                        osoba.liczbaZainteresowan--;
+                    }
+                    break;
+                }
+                case 3: {
+                    cout << "Podaj numer zainteresowania do modyfikacji (1-" << osoba.liczbaZainteresowan << "): ";
+                    int indeks;
+                    cin >> indeks;
+                    indeks--;
+
+                    if (indeks >= 0 && indeks < osoba.liczbaZainteresowan) {
+                        cout << "Podaj now\271 nazw\352 zainteresowania: ";
+                        cin >> osoba.zainteresowania[indeks].nazwa;
+                    }
+                    break;
+                }
+                case 4: {
+                    cout << "Ile nowych zainteresowa\361 chcesz doda\346? ";
+                    cin >> osoba.liczbaZainteresowan;
+                    osoba.liczbaZainteresowan = min(osoba.liczbaZainteresowan, MAKS_ZAINTERESOWAN);
+
+                    for (int i = 0; i < osoba.liczbaZainteresowan; i++) {
+                        cout << "Podaj nazw\352 zainteresowania " << i + 1 << ": ";
+                        cin >> osoba.zainteresowania[i].nazwa;
+                    }
+                    break;
+                }
+            }
+        }
     }
 
     void modyfikowanie() {
@@ -278,8 +361,22 @@ namespace funkcje {
         if (!czyIndeksPoprawny(indeks)) return;
 
         Osoba& osoba = osoby[indeks];
+
+        cout << "\nAktualne dane osoby:\n";
+        cout << "Imi\352 i nazwisko: " << osoba.imie << " " << osoba.nazwisko << "\n";
+        cout << "Adres: " << osoba.ulica << ", " << osoba.miasto << " " << osoba.kodPocztowy << "\n";
+        cout << "Email: " << osoba.email << "\n";
+        cout << "Zainteresowania:\n";
+        for (int i = 0; i < osoba.liczbaZainteresowan; i++) {
+            cout << "  - " << osoba.zainteresowania[i].nazwa << "\n";
+        }
+
+        cout << "\nModyfikacja danych (wpisz . aby zostawi\346 bez zmian):\n";
+
         modyfikujPodstawoweDane(osoba);
+        modyfikujAdres(osoba);
         modyfikujKontakt(osoba);
+        modyfikujZainteresowania(osoba);
 
         zapiszDoPliku();
         cout << "Zmodyfikowano dane osoby.\n";
@@ -295,7 +392,7 @@ namespace funkcje {
             return;
         }
 
-        int indeks = pobierzIndeksOsoby("usunięcia");
+        int indeks = pobierzIndeksOsoby("usuni\352cia");
         if (!czyIndeksPoprawny(indeks)) return;
 
         for (int i = indeks; i < liczbaOsob - 1; i++) {
@@ -303,7 +400,7 @@ namespace funkcje {
         }
         liczbaOsob--;
         zapiszDoPliku();
-        cout << "Usunieto osobe.\n";
+        cout << "Usuni\352to osobe.\n";
         system("pause");
     }
 }
